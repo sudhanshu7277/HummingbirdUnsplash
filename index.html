@@ -60,17 +60,8 @@
       document.body.background = imgUrl;
     }
 
-    function getPhots(str) {
-      var xhttp;
-      if (str.length == 0) {
-        return;
-      }
-      xhttp = new XMLHttpRequest();
-      xhttp.onreadystatechange = function () {
-        if (this.readyState == 4 && this.status == 200) {
-          let response = JSON.parse(this.responseText)
-
-          response.results.forEach(function (element) {
+    function prepareImages(response){
+       response.results.forEach(function (element) {
             var tree = document.createDocumentFragment();
             var link = document.createElement("a");
             link.setAttribute("href", "#");
@@ -81,14 +72,39 @@
             img.height = "200";
             tree.appendChild(link).appendChild(img);
             document.getElementById("galleryId").appendChild(tree);
+           
+           
           }, this);
+    }
+
+    function getPhots(str) {
+      var xhttp;
+      if (str.length == 0) {
+        return;
+      }
+
+       var results = JSON.parse(localStorage.getItem(str));
+      if(results) {
+         console.log('key...', results);
+              prepareImages(results);
+              return;
+      }
+
+      xhttp = new XMLHttpRequest();
+      xhttp.onreadystatechange = function () {
+        if (this.readyState == 4 && this.status == 200) {
+             let response = JSON.parse(this.responseText)
+              prepareImages(response);
+              if(response.results && str.length>3)
+                 localStorage.setItem(str, this.responseText);
         }
       };
 
-      
 
-      var APP_ID = "fe03788af0d5038dbf80970651c83942eea220fb2545603024f06402cfdfefad";
-    //"4c77bcbfae41cfaebeca806431599cf501cdd8a5662aa9b0993da9217d20bff4";
+
+      var APP_ID = "4c77bcbfae41cfaebeca806431599cf501cdd8a5662aa9b0993da9217d20bff4";
+      //"fe03788af0d5038dbf80970651c83942eea220fb2545603024f06402cfdfefad";
+    //;
       var URL = `https://api.unsplash.com/search/photos/?page=1&per_page=10&query=${str}&client_id=${APP_ID}`;
       xhttp.open("GET", URL, true);
       xhttp.send();
